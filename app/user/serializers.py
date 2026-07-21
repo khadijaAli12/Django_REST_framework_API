@@ -34,6 +34,14 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class SuperUserSerializer(UserSerializer):
+    """Serializer for creating a superuser."""
+
+    def create(self, validated_data):
+        """Create and return a superuser with encrypted password."""
+        return get_user_model().objects.create_superuser(**validated_data)
+
+
 class AuthTokenSerializer(serializers.Serializer):
     """Serializer for the user auth token."""
     email = serializers.EmailField()

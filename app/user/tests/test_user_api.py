@@ -10,6 +10,7 @@ from rest_framework import status
 
 
 CREATE_USER_URL = reverse('user:create')
+CREATE_SUPERUSER_URL = reverse('user:create-superuser')
 TOKEN_URL = reverse('user:token')
 ME_URL = reverse('user:me')
 
@@ -36,6 +37,22 @@ class PublicUserApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         user = get_user_model().objects.get(email=payload['email'])
+        self.assertTrue(user.check_password(payload['password']))
+        self.assertNotIn('password', res.data)
+
+    def test_create_superuser_success(self):
+        """Test creating a superuser is successful."""
+        payload = {
+            'email': 'admin@example.com',
+            'password': 'adminpass123',
+            'name': 'Admin User',
+        }
+        res = self.client.post(CREATE_SUPERUSER_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        user = get_user_model().objects.get(email=payload['email'])
+        self.assertTrue(user.is_staff)
+        self.assertTrue(user.is_superuser)
         self.assertTrue(user.check_password(payload['password']))
         self.assertNotIn('password', res.data)
 
